@@ -1,0 +1,36 @@
+- name: Create Node Exporter user
+  user:
+   name: node_exporter
+   create_home: false
+   shell: /bin/false
+
+- name: Download Node Exporter
+  get_url:
+    url: https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz
+    dest: /tmp/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz
+
+- name: Unarchive Node Exporter
+  unarchive:
+    src: /tmp/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz
+    dest: /tmp
+    remote_src: yes
+
+- name: Remove old Node Exporter directory if exists
+  file:
+    path: /opt/node_exporter
+    state: absent
+
+- name: Move Node Exporter to /opt
+  command: mv /tmp/node_exporter-{{ node_exporter_version }}.linux-amd64 /opt/node_exporter
+
+- name: Add Node Exporter service config
+  template:
+    src: node_exporter/node_exporter.service
+    dest: /etc/systemd/system/node_exporter.service
+
+- name: Enable and run Node Exporter service and ensure it is not masked
+  systemd:
+    name: node_exporter
+    state: started
+    enabled: yes
+    masked: no

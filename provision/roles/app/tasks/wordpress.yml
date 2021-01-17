@@ -1,0 +1,31 @@
+- name: Extract wordpress
+  unarchive:
+    src: wordpress/latest-ru_RU.tar.gz
+    dest: /var/www
+    owner: www-data
+    group: www-data
+
+- name: Fetch random salts for WordPress config
+  command: curl http://api.wordpress.org/secret-key/1.1/salt/
+  register: wp_salt
+
+- name: Add WordPress config file
+  template:
+    src: wordpress/wp-config.php
+    dest: /var/www/wordpress
+
+- name: Copy database dump from to remote host
+  copy:
+    src: wordpress/dump.sql
+    dest: /tmp
+
+- name: Import database dump
+  mysql_db:
+    name: "{{ db_name }}"
+    login_user: "{{ db_user }}"
+    login_password: "{{ db_password }}"
+    login_host: "{{ mysql_ip }}"
+    state: import
+    target: /tmp/dump.sql
+
+

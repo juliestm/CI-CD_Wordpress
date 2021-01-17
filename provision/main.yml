@@ -1,0 +1,17 @@
+- hosts: app*
+  become: yes
+  roles:
+    - common
+    - app
+
+- hosts: mysql*
+  become: yes
+  roles:
+    - common
+    - mysql
+
+- hosts: monitoring*
+  become: yes
+  roles:
+    - common
+    - monitoring

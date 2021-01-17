@@ -1,0 +1,19 @@
+- name: Install PHP packages
+  apt:
+    pkg:
+      - php7.4
+      - php7.4-fpm
+      - php7.4-cli
+      - php7.4-curl
+      - php7.4-gd
+      - php7.4-intl
+      - php7.4-json
+      - php7.4-mysql
+      - php7.4-opcache
+    state: present
+
+- name: Start PHP7-FPM service
+  service:
+    name: php7.4-fpm
+    state: started
+    enabled: true

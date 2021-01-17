@@ -1,0 +1,48 @@
+- name: Create Prometheus user
+  user:
+   name: prometheus
+   create_home: false
+   shell: /bin/false
+
+- name: Create directory /var/lib/prometheus
+  file:
+    path: /var/lib/prometheus
+    state: directory
+    owner: prometheus
+    group: prometheus
+
+- name: Download Prometheus
+  get_url:
+    url: https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz
+    dest: /tmp/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz
+
+- name: Unarchive Prometheus
+  unarchive:
+    src: /tmp/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz
+    dest: /tmp
+    remote_src: yes
+
+- name: Remove old Prometheus directory if exists
+  file:
+    path: /opt/prometheus
+    state: absent
+
+- name: Move Prometheus to /opt
+  command: mv /tmp/prometheus-{{ prometheus_version }}.linux-amd64 /opt/prometheus
+
+- name: Add Prometheus service config
+  template:
+    src: prometheus/prometheus.service
+    dest: /etc/systemd/system/prometheus.service
+
+- name: Add Prometheus config
+  template:
+    src: prometheus/prometheus.yml
+    dest: /opt/prometheus/prometheus.yml
+
+- name: Enable and run Prometheus service and ensure it is not masked
+  systemd:
+    name: prometheus
+    state: started
+    enabled: yes
+    masked: no

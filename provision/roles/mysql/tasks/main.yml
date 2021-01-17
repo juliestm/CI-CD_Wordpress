@@ -1,0 +1,41 @@
+- name: Install MariaDB
+  apt:
+    pkg:
+      - mariadb-server
+      - mariadb-client
+      - python3-pymysql
+    state: present
+    update_cache: yes
+
+- name: Stop MariaDB
+  service:
+    name: mariadb
+    state: stopped
+
+- name: Create MariaDB server config
+  template:
+    src: server.cnf
+    dest: /etc/mysql/mariadb.conf.d/60-server.cnf
+
+- name: Create MariaDB root client config
+  template:
+    src: client.cnf
+    dest: /root/.my.cnf
+
+- name: Start MariaDB
+  service:
+    name: mariadb
+    state: started
+
+- name: Create database
+  mysql_db:
+    name: "{{ db_name }}"
+    state: present
+
+- name: Create database user
+  mysql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    priv: "{{ db_name }}.*:ALL"
+    host: "%"
+    state: present

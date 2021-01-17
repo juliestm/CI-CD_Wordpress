@@ -1,0 +1,16 @@
+- name: Install MariaDB client
+  apt:
+    pkg:
+      - mariadb-client
+      - python3-pymysql
+    state: present
+    update_cache: yes
+
+- name: "=> Install PHP"
+  import_tasks: php.yml
+
+- name: "=> Install NGINX"
+  import_tasks: nginx.yml
+
+- name: "=> Install Wordpress"
+  import_tasks: wordpress.yml
